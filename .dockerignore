@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.angular
+test-results
+playwright-report
+coverage
+*.log
+.env
+.env.*

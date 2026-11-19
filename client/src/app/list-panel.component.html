@@ -1,0 +1,45 @@
+<section class="panel" [class.panel-selected]="state().side === 'selected'" [attr.data-testid]="state().side" [attr.aria-label]="state().side === 'selected' ? 'Выбранные элементы' : 'Все элементы'">
+  <div class="panel-heading">
+    <div class="panel-title"><span class="panel-symbol"><app-icon [name]="state().side === 'selected' ? 'check' : 'stack'" /></span><h2>{{ state().side === 'selected' ? 'Выбранные' : 'Все элементы' }}</h2><span class="count">{{ count() | number }}</span></div>
+    <span class="panel-index">{{ state().side === 'selected' ? '02' : '01' }}</span>
+  </div>
+  <p class="panel-description">{{ state().side === 'selected' ? 'Перетаскивайте элементы, чтобы изменить порядок' : 'Добавляйте нужные элементы в свою подборку' }}</p>
+  <label class="search-field"><app-icon name="search" /><input type="search" [attr.aria-label]="state().side === 'selected' ? 'Поиск среди выбранных' : 'Поиск среди всех элементов'" placeholder="Найти по ID…" maxlength="128" [value]="state().filter()" (input)="state().setFilter($any($event.target).value)"></label>
+  <div class="list-caption"><span>{{ state().side === 'selected' ? 'ПОРЯДОК / ID ЭЛЕМЕНТА' : 'ID ЭЛЕМЕНТА' }}</span><span>{{ state().side === 'selected' ? 'УПРАВЛЕНИЕ' : 'ВЫБРАТЬ' }}</span></div>
+  <div #viewport cdkScrollable class="list-viewport" tabindex="0" [attr.aria-label]="state().side === 'selected' ? 'Список выбранных' : 'Список доступных'" [attr.aria-busy]="state().loading()" (scroll)="onScroll()">
+    <div cdkDropList [cdkDropListData]="state().items()" [cdkDropListDisabled]="state().side !== 'selected' || busy() || state().loading()" (cdkDropListDropped)="drop($event)" class="item-list" role="list">
+      @for (id of state().items(); track id; let index = $index) {
+        <div cdkDrag [cdkDragData]="id" class="item-row" role="listitem" [attr.data-id]="id">
+          @if (state().side === 'selected') {
+            <button cdkDragHandle class="icon-button drag-handle" [attr.aria-label]="'Перетащить ' + id" [disabled]="busy() || state().loading()" title="Перетащить"><app-icon name="grip" /></button>
+          } @else { <span class="id-hash" aria-hidden="true">#</span> }
+          <span class="item-id" [title]="id">{{ id }}</span>
+          @if (state().side === 'selected') {
+            <div class="row-actions">
+              <button class="icon-button order-button" [attr.aria-label]="'Поднять ' + id" [disabled]="index === 0 || busy() || state().loading()" (click)="move(index, -1)"><app-icon name="up" /></button>
+              <button class="icon-button order-button" [attr.aria-label]="'Опустить ' + id" [disabled]="index === state().items().length - 1 || busy() || state().loading()" (click)="move(index, 1)"><app-icon name="down" /></button>
+              <button class="icon-button remove-button" [attr.aria-label]="'Убрать ' + id" [disabled]="busy() || state().loading()" (click)="choose.emit(id)" title="Вернуть в общий список"><app-icon name="close" /></button>
+            </div>
+          } @else {
+            <button class="icon-button select-button" [attr.aria-label]="'Выбрать ' + id" [disabled]="busy() || state().loading()" (click)="choose.emit(id)" title="Выбрать элемент"><app-icon name="plus" /></button>
+          }
+        </div>
+      }
+    </div>
+    @if (state().loading() && !state().items().length) {
+      <div class="skeleton-list" aria-hidden="true">@for (i of [1, 2, 3, 4, 5, 6]; track i) { <div class="skeleton-row"><span></span><span></span></div> }</div>
+    } @else if (!state().items().length && !state().error()) {
+      <div class="empty-state"><span class="empty-icon"><app-icon [name]="state().filter() ? 'search' : 'stack'" /></span><h3>{{ state().filter() ? 'Ничего не найдено' : state().side === 'selected' ? 'Ваша подборка начинается здесь' : 'Все элементы уже выбраны' }}</h3><p>{{ state().filter() ? 'Попробуйте другой ID или очистите поиск.' : state().side === 'selected' ? 'Нажмите + у элемента слева, чтобы добавить его в этот список.' : 'Верните элементы из правого списка.' }}</p></div>
+    }
+    @if (state().error()) {
+      <div class="list-error" role="alert"><p>{{ state().error() }}</p><button class="text-button" (click)="state().retry()">Повторить загрузку</button></div>
+    } @else if (state().loading()) {
+      <div class="list-more" role="status"><span class="spinner"></span> Загружаем элементы…</div>
+    } @else if (state().nextCursor()) {
+      <button class="load-more" (click)="state().loadMore()">Загрузить ещё 20 <app-icon name="down" /></button>
+    } @else if (state().items().length) {
+      <div class="list-end">Все результаты загружены</div>
+    }
+  </div>
+  <footer class="panel-footer"><span>Загружено <strong>{{ state().items().length | number }}</strong></span><span>{{ state().filter() ? 'Поиск по вхождению' : 'По 20 элементов' }}</span></footer>
+</section>
