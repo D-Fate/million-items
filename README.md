@@ -41,7 +41,7 @@ server/     Express API, хранилище и очереди
 shared/     общие типы запросов и ответов
 tests/      unit, API и браузерные тесты
 scripts/    нагрузочная проверка
-docs/       описание API, тестирования и деплоя
+docs/       описание API, тестирования и запуска
 ```
 
 Исходный миллион ID представлен диапазоном. В памяти хранятся добавленные ID, множество выбранных значений и массив их порядка.
@@ -62,7 +62,7 @@ npm run test:e2e
 
 `npm run check` запускает тесты, production-сборку и E2E. Для него Chromium должен быть установлен заранее. Нагрузочная проверка запускается отдельно: `npm run test:load`.
 
-[API](docs/API.md) · [Тестирование](docs/TESTING.md) · [Деплой в Amvera](docs/DEPLOYMENT.md)
+[API](docs/API.md) · [Тестирование](docs/TESTING.md) · [Запуск в production](docs/DEPLOYMENT.md)
 
 ## Ограничения
 
